@@ -5,7 +5,8 @@ from functools import wraps
 from flask import (Blueprint, abort, flash, g, redirect, render_template, request,
                    session, url_for)
 
-from models import SHOP_FIELDS, Admin, Cast, Event, Image, PriceItem, Setting, db
+from models import (CONCEPT_FIELDS, RECRUIT_FIELDS, SHOP_FIELDS, Admin, Cast, Event, Image, PriceItem,
+                    Recruit, Setting, db)
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -147,7 +148,20 @@ def dashboard():
         cast_visible=Cast.query.filter_by(visible=True).count(),
         event_count=Event.query.count(),
         price_count=PriceItem.query.count(),
+        recruit_count=Recruit.query.filter_by(visible=True).count(),
     )
+
+
+def _save_settings(keys):
+    for key in keys:
+        row = db.session.get(Setting, key) or Setting(key=key)
+        row.value = request.form.get(key, "").strip()
+        db.session.add(row)
+    db.session.commit()
+
+
+def _setting_values():
+    return {s.key: s.value for s in Setting.query.all()}
 
 
 # ------------------------------------------------------------
@@ -157,15 +171,23 @@ def dashboard():
 @login_required
 def shop():
     if request.method == "POST":
-        for key, _label, _default in SHOP_FIELDS:
-            row = db.session.get(Setting, key) or Setting(key=key)
-            row.value = request.form.get(key, "").strip()
-            db.session.add(row)
-        db.session.commit()
+        _save_settings([k for k, _l, _d in SHOP_FIELDS])
         flash("店舗情報を保存しました。")
         return redirect(url_for("admin.shop"))
-    values = {s.key: s.value for s in Setting.query.all()}
-    return render_template("admin/shop.html", fields=SHOP_FIELDS, values=values)
+    return render_template("admin/shop.html", fields=SHOP_FIELDS, values=_setting_values())
+
+
+# ------------------------------------------------------------
+# お店について（CONCEPT）
+# ------------------------------------------------------------
+@admin_bp.route("/concept", methods=["GET", "POST"])
+@login_required
+def concept():
+    if request.method == "POST":
+        _save_settings([k for k, _l, _d, _t in CONCEPT_FIELDS])
+        flash("「お店について」を保存しました。")
+        return redirect(url_for("admin.concept"))
+    return render_template("admin/concept.html", fields=CONCEPT_FIELDS, values=_setting_values())
 
 
 # ------------------------------------------------------------
@@ -277,6 +299,57 @@ def event_delete(event_id):
     db.session.commit()
     flash(f"イベント「{item.title}」を削除しました。")
     return redirect(url_for("admin.events"))
+
+
+# ------------------------------------------------------------
+# 求人
+# ------------------------------------------------------------
+@admin_bp.route("/recruits", methods=["GET", "POST"])
+@login_required
+def recruits():
+    if request.method == "POST":
+        _save_settings([k for k, _l, _d, _t in RECRUIT_FIELDS])
+        flash("求人の注意書きを保存しました。")
+        return redirect(url_for("admin.recruits"))
+    items = Recruit.query.order_by(Recruit.sort_order, Recruit.id).all()
+    return render_template("admin/recruits.html", items=items, fields=RECRUIT_FIELDS, values=_setting_values())
+
+
+@admin_bp.route("/recruits/new", methods=["GET", "POST"])
+@admin_bp.route("/recruits/<int:recruit_id>", methods=["GET", "POST"])
+@login_required
+def recruit_edit(recruit_id=None):
+    item = db.session.get(Recruit, recruit_id) if recruit_id else Recruit(visible=True, sort_order=Recruit.query.count())
+    if item is None:
+        abort(404)
+    error = None
+    if request.method == "POST":
+        item.title = request.form.get("title", "").strip()
+        item.salary = request.form.get("salary", "").strip()
+        item.hours = request.form.get("hours", "").strip()
+        item.benefits = request.form.get("benefits", "").strip()
+        item.detail = request.form.get("detail", "").strip()
+        item.visible = bool(request.form.get("visible"))
+        item.sort_order = _int(request.form.get("sort_order"))
+        if not item.title:
+            error = "職種名を入力してください。"
+        else:
+            db.session.add(item)
+            db.session.commit()
+            flash(f"求人「{item.title}」を保存しました。")
+            return redirect(url_for("admin.recruits"))
+        db.session.rollback()
+    return render_template("admin/recruit_form.html", item=item, error=error)
+
+
+@admin_bp.route("/recruits/<int:recruit_id>/delete", methods=["POST"])
+@login_required
+def recruit_delete(recruit_id):
+    item = db.session.get(Recruit, recruit_id) or abort(404)
+    db.session.delete(item)
+    db.session.commit()
+    flash(f"求人「{item.title}」を削除しました。")
+    return redirect(url_for("admin.recruits"))
 
 
 # ------------------------------------------------------------

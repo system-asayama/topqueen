@@ -2,11 +2,12 @@ import os
 import secrets
 import time
 
+from markupsafe import Markup, escape
 from flask import Flask, Response, abort, render_template
 from sqlalchemy.exc import OperationalError
 
 from admin import admin_bp
-from models import Cast, Event, Image, PriceItem, Setting, db, get_shop, seed_initial_data
+from models import Cast, Event, Image, PriceItem, Recruit, Setting, db, get_shop, seed_initial_data
 
 app = Flask(__name__)
 
@@ -49,6 +50,13 @@ def init_db():
 init_db()
 
 
+@app.template_filter("nl2br")
+def nl2br(value):
+    """改行を <br> に変換（HTML はエスケープ）。"""
+    text = escape(value or "").replace("\r\n", "\n").replace("\r", "\n")
+    return Markup(str(text).replace("\n", "<br>"))
+
+
 @app.route("/")
 def index():
     return render_template(
@@ -58,6 +66,7 @@ def index():
         options=PriceItem.query.filter_by(kind="option").order_by(PriceItem.sort_order, PriceItem.id).all(),
         cast=Cast.query.filter_by(visible=True).order_by(Cast.sort_order, Cast.id).all(),
         events=Event.query.filter_by(visible=True).order_by(Event.sort_order, Event.id).all(),
+        recruits=Recruit.query.filter_by(visible=True).order_by(Recruit.sort_order, Recruit.id).all(),
     )
 
 

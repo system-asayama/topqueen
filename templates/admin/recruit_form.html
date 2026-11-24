@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+{% block title %}求人編集{% endblock %}
+{% block content %}
+<h1>{{ '求人を編集' if item.id else '求人を追加' }}</h1>
+<form method="post" class="card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="row">
+    <label>職種 *<input name="title" value="{{ item.title or '' }}" placeholder="ホールスタッフ" required></label>
+    <label>給与<input name="salary" value="{{ item.salary or '' }}" placeholder="時給 1,300円〜"></label>
+    <label>並び順<input type="number" name="sort_order" value="{{ item.sort_order or 0 }}"></label>
+  </div>
+  <label>勤務時間<input name="hours" value="{{ item.hours or '' }}" placeholder="19:30〜LAST（週2日〜OK）"></label>
+  <label>待遇<input name="benefits" value="{{ item.benefits or '' }}" placeholder="交通費支給・まかない有"></label>
+  <label>詳細・応募資格など（任意）<textarea name="detail" rows="4">{{ item.detail or '' }}</textarea></label>
+  <label class="check"><input type="checkbox" name="visible" value="1" {{ 'checked' if item.visible }}> サイトに掲載する</label>
+  <div class="btns"><button class="btn">保存する</button><a class="btn ghost" href="{{ url_for('admin.recruits') }}">戻る</a></div>
+</form>
+{% endblock %}

@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% block title %}イベント編集{% endblock %}
 {% block content %}
-<h1>{{ 'イベントを編集' if item.id else 'イベントを追加' }}</h1>
+<h1>{{ 'イベント・お知らせを編集' if item.id else 'イベント・お知らせを追加' }}</h1>
 <form method="post" class="card">
   <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
   <div class="row">

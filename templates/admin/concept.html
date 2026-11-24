@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+{% block title %}お店について{% endblock %}
+{% block content %}
+<h1>お店について（CONCEPT）</h1>
+<p class="hint">トップページの「CONCEPT」欄の内容です。特徴はタイトルを空欄にするとその枠は表示されません。</p>
+<form method="post" class="card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  {% for key, label, default, type in fields %}
+  {% if key == 'feature1_title' %}<h2 class="sep">特徴（最大4つ）</h2>{% endif %}
+  <label>{{ label }}
+    {% if type == 'textarea' %}
+    <textarea name="{{ key }}" rows="{{ 5 if key == 'concept_body' else 2 }}">{{ values.get(key, default) }}</textarea>
+    {% else %}
+    <input name="{{ key }}" value="{{ values.get(key, default) }}">
+    {% endif %}
+  </label>
+  {% endfor %}
+  <button class="btn">保存する</button>
+</form>
+{% endblock %}

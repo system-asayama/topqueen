@@ -58,17 +58,16 @@
     <h2 class="sec-title"><span>CONCEPT</span>お店について</h2>
     <div class="concept-grid">
       <div class="concept-text">
-        <p class="lead">陽気で明るいフィリピーナが<br>心を込めておもてなし。</p>
-        <p>{{ shop.name }}は、本場フィリピン出身の明るく可愛いキャストが在籍するフィリピンパブです。
-          カラオケ・ダンスショー・季節のイベントなど、日常を忘れて楽しめる時間をご用意しています。
-          初めての方、お一人様、会社帰りのグループ様も大歓迎。安心の明朗会計でお待ちしております。</p>
+        {% if shop.concept_lead %}<p class="lead">{{ shop.concept_lead | nl2br }}</p>{% endif %}
+        <p>{{ shop.concept_body | nl2br }}</p>
       </div>
+      {% if shop.features %}
       <ul class="feature-list">
-        <li><b>01</b><h3>明朗会計</h3><p>セット料金で飲み放題。追加料金も事前にご案内します。</p></li>
-        <li><b>02</b><h3>カラオケ無料</h3><p>最新機種完備。キャストとデュエットも！</p></li>
-        <li><b>03</b><h3>ショータイム</h3><p>週末はキャストによるダンスショーを開催。</p></li>
-        <li><b>04</b><h3>VIPルーム</h3><p>接待や記念日にも使える特別なお席をご用意。</p></li>
+        {% for f in shop.features %}
+        <li><b>{{ '%02d' % loop.index }}</b><h3>{{ f.title }}</h3><p>{{ f.body }}</p></li>
+        {% endfor %}
       </ul>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -94,7 +93,7 @@
       {% endfor %}
     </table>
     {% endif %}
-    {% if shop.service_note %}<p class="small">{{ shop.service_note | replace('\r', '') | e | replace('\n', '<br>'|safe) }}</p>{% endif %}
+    {% if shop.service_note %}<p class="small">{{ shop.service_note | nl2br }}</p>{% endif %}
   </div>
 </section>
 
@@ -165,24 +164,21 @@
   <div class="container">
     <h2 class="sec-title"><span>RECRUIT</span>求人情報</h2>
     <div class="recruit-grid">
+      {% for r in recruits %}
       <div class="recruit-card">
-        <h3>ホールスタッフ・ボーイ</h3>
+        <h3>{{ r.title }}</h3>
         <dl>
-          <dt>給与</dt><dd>時給 1,300円〜（経験・能力により優遇）</dd>
-          <dt>時間</dt><dd>19:30〜LAST（週2日〜OK）</dd>
-          <dt>待遇</dt><dd>交通費支給・まかない有・昇給随時</dd>
+          {% if r.salary %}<dt>給与</dt><dd>{{ r.salary }}</dd>{% endif %}
+          {% if r.hours %}<dt>時間</dt><dd>{{ r.hours }}</dd>{% endif %}
+          {% if r.benefits %}<dt>待遇</dt><dd>{{ r.benefits }}</dd>{% endif %}
         </dl>
+        {% if r.detail %}<p class="recruit-detail">{{ r.detail | nl2br }}</p>{% endif %}
       </div>
-      <div class="recruit-card">
-        <h3>フロア・キャスト</h3>
-        <dl>
-          <dt>給与</dt><dd>時給 2,500円〜 ＋ 各種バック</dd>
-          <dt>時間</dt><dd>20:00〜LAST（シフト自由）</dd>
-          <dt>待遇</dt><dd>日払いOK・送り有・寮完備（要相談）</dd>
-        </dl>
-      </div>
+      {% else %}
+      <p class="center">現在募集している職種はありません。</p>
+      {% endfor %}
     </div>
-    <p class="center small">※ 就労可能な在留資格をお持ちの方に限ります。お気軽にお電話・LINEでお問い合わせください。</p>
+    {% if shop.recruit_note %}<p class="center small">{{ shop.recruit_note | nl2br }}</p>{% endif %}
   </div>
 </section>
 

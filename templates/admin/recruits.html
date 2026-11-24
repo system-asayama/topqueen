@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% block title %}求人{% endblock %}
+{% block content %}
+<div class="head-row"><h1>求人</h1><a class="btn" href="{{ url_for('admin.recruit_edit') }}">＋ 新しく追加</a></div>
+<p class="hint">職種ごとにカードで表示されます。募集を止めるときは「非表示」にしてください。</p>
+<table class="list">
+  <tr><th>並び順</th><th>職種</th><th>給与</th><th>状態</th><th></th></tr>
+  {% for r in items %}
+  <tr class="{{ 'hidden' if not r.visible }}">
+    <td>{{ r.sort_order }}</td><td>{{ r.title }}</td><td class="muted">{{ r.salary }}</td>
+    <td>{{ '掲載中' if r.visible else '非表示' }}</td>
+    <td class="actions">
+      <a class="btn sm" href="{{ url_for('admin.recruit_edit', recruit_id=r.id) }}">編集</a>
+      <form method="post" action="{{ url_for('admin.recruit_delete', recruit_id=r.id) }}" onsubmit="return confirm('削除しますか？')">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn sm danger">削除</button>
+      </form>
+    </td>
+  </tr>
+  {% else %}<tr><td colspan="5">求人が登録されていません。</td></tr>{% endfor %}
+</table>
+<form method="post" class="card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  {% for key, label, default, type in fields %}
+  <label>{{ label }}（求人欄の一番下に表示）<textarea name="{{ key }}" rows="3">{{ values.get(key, default) }}</textarea></label>
+  {% endfor %}
+  <button class="btn">注意書きを保存</button>
+</form>
+{% endblock %}

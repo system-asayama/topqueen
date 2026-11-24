@@ -70,3 +70,5 @@ label.check input { width: 18px; height: 18px; }
   .cast-item { flex-wrap: wrap; }
   .photo-field { flex-direction: column; }
 }
+.sep { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.list + .card { margin-top: 4px; }

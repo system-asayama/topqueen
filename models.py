@@ -53,6 +53,17 @@ class Event(db.Model):
     sort_order = db.Column(db.Integer, default=0)
 
 
+class Recruit(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(128), nullable=False)
+    salary = db.Column(db.String(255), default="")
+    hours = db.Column(db.String(255), default="")
+    benefits = db.Column(db.String(255), default="")
+    detail = db.Column(db.Text, default="")
+    visible = db.Column(db.Boolean, default=True)
+    sort_order = db.Column(db.Integer, default=0)
+
+
 class PriceItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     kind = db.Column(db.String(16), nullable=False, default="set")  # set / option
@@ -82,9 +93,38 @@ SHOP_FIELDS = [
 ]
 
 
+# お店について（CONCEPT）
+CONCEPT_FIELDS = [
+    ("concept_lead", "見出し", "陽気で明るいフィリピーナが\n心を込めておもてなし。", "textarea"),
+    ("concept_body", "本文", "TOP QUEENは、本場フィリピン出身の明るく可愛いキャストが在籍するフィリピンパブです。"
+     "カラオケ・ダンスショー・季節のイベントなど、日常を忘れて楽しめる時間をご用意しています。"
+     "初めての方、お一人様、会社帰りのグループ様も大歓迎。安心の明朗会計でお待ちしております。", "textarea"),
+    ("feature1_title", "特徴1 タイトル", "明朗会計", "input"),
+    ("feature1_body", "特徴1 説明", "セット料金で飲み放題。追加料金も事前にご案内します。", "input"),
+    ("feature2_title", "特徴2 タイトル", "カラオケ無料", "input"),
+    ("feature2_body", "特徴2 説明", "最新機種完備。キャストとデュエットも！", "input"),
+    ("feature3_title", "特徴3 タイトル", "ショータイム", "input"),
+    ("feature3_body", "特徴3 説明", "週末はキャストによるダンスショーを開催。", "input"),
+    ("feature4_title", "特徴4 タイトル", "VIPルーム", "input"),
+    ("feature4_body", "特徴4 説明", "接待や記念日にも使える特別なお席をご用意。", "input"),
+]
+
+# 求人ページ下の注意書き
+RECRUIT_FIELDS = [
+    ("recruit_note", "求人の注意書き",
+     "※ 就労可能な在留資格をお持ちの方に限ります。お気軽にお電話・LINEでお問い合わせください。", "textarea"),
+]
+
+ALL_SETTING_DEFAULTS = (
+    [(k, d) for k, _l, d in SHOP_FIELDS]
+    + [(k, d) for k, _l, d, _t in CONCEPT_FIELDS]
+    + [(k, d) for k, _l, d, _t in RECRUIT_FIELDS]
+)
+
+
 def seed_initial_data():
     """初回起動時にサンプルデータを入れる（既にデータがあれば何もしない）。"""
-    for key, _label, default in SHOP_FIELDS:
+    for key, default in ALL_SETTING_DEFAULTS:
         if db.session.get(Setting, key) is None:
             db.session.add(Setting(key=key, value=default))
 
@@ -125,12 +165,23 @@ def seed_initial_data():
         for i, (d, t, b) in enumerate(events):
             db.session.add(Event(date_label=d, title=t, body=b, sort_order=i))
 
+    if Recruit.query.count() == 0:
+        db.session.add(Recruit(title="ホールスタッフ・ボーイ", salary="時給 1,300円〜（経験・能力により優遇）",
+                               hours="19:30〜LAST（週2日〜OK）", benefits="交通費支給・まかない有・昇給随時", sort_order=0))
+        db.session.add(Recruit(title="フロア・キャスト", salary="時給 2,500円〜 ＋ 各種バック",
+                               hours="20:00〜LAST（シフト自由）", benefits="日払いOK・送り有・寮完備（要相談）", sort_order=1))
+
     db.session.commit()
 
 
 def get_shop():
-    shop = {key: default for key, _label, default in SHOP_FIELDS}
+    shop = dict(ALL_SETTING_DEFAULTS)
     for s in Setting.query.all():
-        shop[s.key] = s.value
+        if not s.key.startswith("_"):
+            shop[s.key] = s.value
+    shop["features"] = [
+        {"title": shop.get(f"feature{i}_title", ""), "body": shop.get(f"feature{i}_body", "")}
+        for i in range(1, 5) if shop.get(f"feature{i}_title", "").strip()
+    ]
     shop["tel_link"] = "".join(ch for ch in shop.get("tel", "") if ch.isdigit() or ch == "+")
     return shop

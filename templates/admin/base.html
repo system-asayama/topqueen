@@ -13,9 +13,11 @@
   <a href="{{ url_for('admin.dashboard') }}" class="a-logo">♛ TOP QUEEN <small>管理画面</small></a>
   <nav class="a-nav">
     <a href="{{ url_for('admin.shop') }}" class="{{ 'on' if request.endpoint == 'admin.shop' }}">店舗情報</a>
+    <a href="{{ url_for('admin.concept') }}" class="{{ 'on' if request.endpoint == 'admin.concept' }}">お店について</a>
     <a href="{{ url_for('admin.prices') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.price') }}">料金</a>
     <a href="{{ url_for('admin.casts') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.cast') }}">キャスト</a>
-    <a href="{{ url_for('admin.events') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.event') }}">イベント</a>
+    <a href="{{ url_for('admin.events') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.event') }}">イベント・お知らせ</a>
+    <a href="{{ url_for('admin.recruits') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.recruit') }}">求人</a>
     <a href="{{ url_for('admin.accounts') }}" class="{{ 'on' if request.endpoint == 'admin.accounts' }}">アカウント</a>
     <a href="{{ url_for('index') }}" target="_blank">サイトを見る ↗</a>
     <form method="post" action="{{ url_for('admin.logout') }}" class="inline">
