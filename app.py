@@ -1,70 +1,74 @@
-from flask import Flask, render_template
+import os
+import secrets
+import time
+
+from flask import Flask, Response, abort, render_template
+from sqlalchemy.exc import OperationalError
+
+from admin import admin_bp
+from models import Cast, Event, Image, PriceItem, Setting, db, get_shop, seed_initial_data
 
 app = Flask(__name__)
 
-# ------------------------------------------------------------
-# 店舗情報（※サンプル値です。実際の情報に書き換えてください）
-# ------------------------------------------------------------
-SHOP = {
-    "name": "TOP QUEEN",
-    "kana": "トップクイーン",
-    "genre": "フィリピンパブ",
-    "tel": "000-0000-0000",
-    "tel_link": "00000000000",
-    "address": "〒000-0000 ○○県○○市○○町1-2-3 ○○ビル 2F",
-    "station": "○○駅 徒歩3分",
-    "hours": "20:00 〜 LAST",
-    "holiday": "年中無休",
-    "line_url": "#",
-    "instagram_url": "#",
-    "x_url": "#",
-    "map_query": "Tokyo Station",  # Googleマップの検索ワード（住所に変更）
-}
+database_url = os.environ.get("DATABASE_URL", "sqlite:///topqueen.db")
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 画像アップロード上限 10MB
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-# 料金システム（※サンプル値）
-SYSTEM = [
-    {"title": "SET 60分", "price": "¥4,000", "note": "飲み放題（焼酎・ウイスキー・ビール・ソフトドリンク）"},
-    {"title": "延長 30分", "price": "¥2,000", "note": "自動延長はございません"},
-    {"title": "指名料", "price": "¥1,000", "note": "場内指名 ¥1,000"},
-    {"title": "レディースドリンク", "price": "¥1,000〜", "note": ""},
-]
-SYSTEM_OPTIONS = [
-    ("VIPルーム", "¥5,000〜"),
-    ("カラオケ", "無料"),
-    ("ボトルキープ", "¥8,000〜"),
-    ("シャンパン", "¥15,000〜"),
-]
+db.init_app(app)
+app.register_blueprint(admin_bp)
 
-# キャスト（※サンプル。画像は static/img/cast/ に置いて image を指定）
-CAST = [
-    {"name": "ANNA", "age": 22, "from_": "Manila", "comment": "歌うのが大好き！一緒にカラオケしよう♪", "image": None, "new": True},
-    {"name": "MARIA", "age": 24, "from_": "Cebu", "comment": "笑顔で元気にお迎えします！", "image": None, "new": False},
-    {"name": "JASMINE", "age": 21, "from_": "Davao", "comment": "日本語勉強中です。たくさん話してね", "image": None, "new": True},
-    {"name": "CHERRY", "age": 25, "from_": "Pampanga", "comment": "ダンスが得意！ショータイムも見てね", "image": None, "new": False},
-    {"name": "BELLA", "age": 23, "from_": "Manila", "comment": "楽しい時間を一緒に過ごしましょう", "image": None, "new": False},
-    {"name": "NICOLE", "age": 22, "from_": "Iloilo", "comment": "初めての方も大歓迎です♡", "image": None, "new": False},
-    {"name": "RICA", "age": 26, "from_": "Baguio", "comment": "お酒好きな方、乾杯しましょう！", "image": None, "new": False},
-    {"name": "LOVELY", "age": 20, "from_": "Laguna", "comment": "名前の通りラブリーに接客します", "image": None, "new": True},
-]
 
-# イベント・ニュース（※サンプル）
-EVENTS = [
-    {"date": "2026.12.24", "title": "クリスマスパーティー", "body": "サンタコスでお出迎え。ご来店の方にプレゼントあり！"},
-    {"date": "2026.12.31", "title": "カウントダウンイベント", "body": "年越しをTOP QUEENで。シャンパンタワーも開催！"},
-    {"date": "毎週金曜", "title": "ショータイム", "body": "23:00〜 キャストによるダンスショーを開催中。"},
-]
+def init_db():
+    """DB の起動を待ってテーブル作成・初期データ投入・秘密鍵の用意をする。"""
+    for attempt in range(30):
+        try:
+            with app.app_context():
+                db.create_all()
+                seed_initial_data()
+                key = os.environ.get("SECRET_KEY")
+                if not key:
+                    row = db.session.get(Setting, "_secret_key")
+                    if row is None:
+                        row = Setting(key="_secret_key", value=secrets.token_hex(32))
+                        db.session.add(row)
+                        db.session.commit()
+                    key = row.value
+                app.secret_key = key
+            return
+        except OperationalError:
+            if attempt == 29:
+                raise
+            time.sleep(2)
+
+
+init_db()
 
 
 @app.route("/")
 def index():
     return render_template(
         "index.html",
-        shop=SHOP,
-        system=SYSTEM,
-        options=SYSTEM_OPTIONS,
-        cast=CAST,
-        events=EVENTS,
+        shop=get_shop(),
+        system=PriceItem.query.filter_by(kind="set").order_by(PriceItem.sort_order, PriceItem.id).all(),
+        options=PriceItem.query.filter_by(kind="option").order_by(PriceItem.sort_order, PriceItem.id).all(),
+        cast=Cast.query.filter_by(visible=True).order_by(Cast.sort_order, Cast.id).all(),
+        events=Event.query.filter_by(visible=True).order_by(Event.sort_order, Event.id).all(),
     )
+
+
+@app.route("/media/<int:image_id>")
+def media(image_id):
+    img = db.session.get(Image, image_id)
+    if img is None:
+        abort(404)
+    resp = Response(img.data, mimetype=img.mimetype)
+    resp.headers["Cache-Control"] = "public, max-age=86400"
+    return resp
 
 
 @app.route("/healthz")

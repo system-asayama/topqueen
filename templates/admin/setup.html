@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}
+{% block title %}初期設定{% endblock %}
+{% block content %}
+<div class="auth">
+  <h1>♛ TOP QUEEN<small>最初の管理者アカウントを作成</small></h1>
+  <form method="post" class="card">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <p class="hint">この画面は管理者がまだ1人もいないときだけ表示されます。</p>
+    <label>ユーザー名<input name="username" required autofocus autocomplete="username"></label>
+    <label>パスワード（8文字以上）<input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+    <label>パスワード（確認）<input type="password" name="password2" required minlength="8" autocomplete="new-password"></label>
+    <button class="btn">作成してログイン</button>
+  </form>
+</div>
+{% endblock %}

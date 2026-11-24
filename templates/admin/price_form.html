@@ -1,0 +1,21 @@
+{% extends "admin/base.html" %}
+{% block title %}料金編集{% endblock %}
+{% block content %}
+<h1>{{ '料金を編集' if item.id else '料金を追加' }}</h1>
+<form method="post" class="card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <label>種類
+    <select name="kind">
+      <option value="set" {{ 'selected' if item.kind == 'set' }}>基本料金（カード表示）</option>
+      <option value="option" {{ 'selected' if item.kind == 'option' }}>オプション（表で表示）</option>
+    </select>
+  </label>
+  <div class="row">
+    <label>項目名 *<input name="title" value="{{ item.title or '' }}" placeholder="SET 60分" required></label>
+    <label>料金 *<input name="price" value="{{ item.price or '' }}" placeholder="¥4,000" required></label>
+    <label>並び順<input type="number" name="sort_order" value="{{ item.sort_order or 0 }}"></label>
+  </div>
+  <label>補足（基本料金のみ表示）<input name="note" value="{{ item.note or '' }}"></label>
+  <div class="btns"><button class="btn">保存する</button><a class="btn ghost" href="{{ url_for('admin.prices') }}">戻る</a></div>
+</form>
+{% endblock %}

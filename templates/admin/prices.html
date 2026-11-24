@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% block title %}料金{% endblock %}
+{% block content %}
+<div class="head-row"><h1>料金システム</h1>
+  <div><a class="btn" href="{{ url_for('admin.price_edit', kind='set') }}">＋ 基本料金</a> <a class="btn" href="{{ url_for('admin.price_edit', kind='option') }}">＋ オプション</a></div>
+</div>
+<p class="hint">「基本料金」は大きなカード、「オプション」は下の表に表示されます。注意書きは「店舗情報」で編集できます。</p>
+<table class="list">
+  <tr><th>種類</th><th>並び順</th><th>項目</th><th>料金</th><th>補足</th><th></th></tr>
+  {% for p in items %}
+  <tr>
+    <td>{{ '基本料金' if p.kind == 'set' else 'オプション' }}</td><td>{{ p.sort_order }}</td>
+    <td>{{ p.title }}</td><td>{{ p.price }}</td><td class="muted">{{ p.note }}</td>
+    <td class="actions">
+      <a class="btn sm" href="{{ url_for('admin.price_edit', price_id=p.id) }}">編集</a>
+      <form method="post" action="{{ url_for('admin.price_delete', price_id=p.id) }}" onsubmit="return confirm('削除しますか？')">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn sm danger">削除</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

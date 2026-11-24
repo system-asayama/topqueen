@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+{% block title %}イベント{% endblock %}
+{% block content %}
+<div class="head-row"><h1>イベント・お知らせ</h1><a class="btn" href="{{ url_for('admin.event_edit') }}">＋ 新しく追加</a></div>
+<table class="list">
+  <tr><th>並び順</th><th>日付</th><th>タイトル</th><th>状態</th><th></th></tr>
+  {% for e in items %}
+  <tr class="{{ 'hidden' if not e.visible }}">
+    <td>{{ e.sort_order }}</td><td>{{ e.date_label }}</td><td>{{ e.title }}</td>
+    <td>{{ '表示' if e.visible else '非表示' }}</td>
+    <td class="actions">
+      <a class="btn sm" href="{{ url_for('admin.event_edit', event_id=e.id) }}">編集</a>
+      <form method="post" action="{{ url_for('admin.event_delete', event_id=e.id) }}" onsubmit="return confirm('削除しますか？')">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn sm danger">削除</button>
+      </form>
+    </td>
+  </tr>
+  {% else %}<tr><td colspan="5">イベントが登録されていません。</td></tr>{% endfor %}
+</table>
+{% endblock %}

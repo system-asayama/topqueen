@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+{% block title %}イベント編集{% endblock %}
+{% block content %}
+<h1>{{ 'イベントを編集' if item.id else 'イベントを追加' }}</h1>
+<form method="post" class="card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="row">
+    <label>日付 *<input name="date_label" value="{{ item.date_label or '' }}" placeholder="2026.12.24 / 毎週金曜 など" required></label>
+    <label>並び順<input type="number" name="sort_order" value="{{ item.sort_order or 0 }}"></label>
+  </div>
+  <label>タイトル *<input name="title" value="{{ item.title or '' }}" required></label>
+  <label>内容<textarea name="body" rows="4">{{ item.body or '' }}</textarea></label>
+  <label class="check"><input type="checkbox" name="visible" value="1" {{ 'checked' if item.visible }}> サイトに表示する</label>
+  <div class="btns"><button class="btn">保存する</button><a class="btn ghost" href="{{ url_for('admin.events') }}">戻る</a></div>
+</form>
+{% endblock %}
