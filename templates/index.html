@@ -86,13 +86,15 @@
       </div>
       {% endfor %}
     </div>
+    {% if options %}
     <table class="option-table">
       <caption>OPTION</caption>
-      {% for name, price in options %}
-      <tr><th>{{ name }}</th><td>{{ price }}</td></tr>
+      {% for o in options %}
+      <tr><th>{{ o.title }}</th><td>{{ o.price }}</td></tr>
       {% endfor %}
     </table>
-    <p class="small">※ 表示価格は税込です。別途サービス料 20% を頂戴いたします。<br>※ 各種クレジットカードご利用いただけます。</p>
+    {% endif %}
+    {% if shop.service_note %}<p class="small">{{ shop.service_note | replace('\r', '') | e | replace('\n', '<br>'|safe) }}</p>{% endif %}
   </div>
 </section>
 
@@ -104,8 +106,8 @@
       {% for c in cast %}
       <article class="cast-card">
         <div class="cast-photo">
-          {% if c.image %}
-          <img src="{{ url_for('static', filename='img/cast/' ~ c.image) }}" alt="{{ c.name }}" loading="lazy">
+          {% if c.image_id %}
+          <img src="{{ url_for('media', image_id=c.image_id) }}" alt="{{ c.name }}" loading="lazy">
           {% else %}
           <div class="cast-placeholder"><span>{{ c.name[0] }}</span></div>
           {% endif %}
@@ -113,7 +115,7 @@
         </div>
         <div class="cast-body">
           <h3>{{ c.name }}</h3>
-          <p class="cast-meta">{{ c.age }}歳 ／ from {{ c.from_ }}</p>
+          <p class="cast-meta">{% if c.age %}{{ c.age }}歳{% endif %}{% if c.age and c.origin %} ／ {% endif %}{% if c.origin %}from {{ c.origin }}{% endif %}</p>
           <p class="cast-comment">{{ c.comment }}</p>
         </div>
       </article>

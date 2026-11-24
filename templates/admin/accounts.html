@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+{% block title %}アカウント{% endblock %}
+{% block content %}
+<h1>アカウント</h1>
+<div class="two">
+  <form method="post" class="card">
+    <h2>パスワード変更</h2>
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><input type="hidden" name="action" value="password">
+    <label>現在のパスワード<input type="password" name="current" required autocomplete="current-password"></label>
+    <label>新しいパスワード（8文字以上）<input type="password" name="new" minlength="8" required autocomplete="new-password"></label>
+    <label>新しいパスワード（確認）<input type="password" name="new2" minlength="8" required autocomplete="new-password"></label>
+    <button class="btn">変更する</button>
+  </form>
+  <div class="card">
+    <h2>管理者一覧</h2>
+    <table class="list">
+      {% for a in admins %}
+      <tr><td>{{ a.username }}{% if a.id == g.admin.id %} <em class="tag">あなた</em>{% endif %}</td>
+        <td class="actions">{% if a.id != g.admin.id %}
+          <form method="post" onsubmit="return confirm('{{ a.username }} を削除しますか？')">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ a.id }}">
+            <button class="btn sm danger">削除</button>
+          </form>{% endif %}</td></tr>
+      {% endfor %}
+    </table>
+    <form method="post">
+      <h2>管理者を追加</h2>
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><input type="hidden" name="action" value="add">
+      <label>ユーザー名<input name="username" required autocomplete="off"></label>
+      <label>パスワード（8文字以上）<input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
+      <button class="btn">追加する</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

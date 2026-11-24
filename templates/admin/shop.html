@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+{% block title %}店舗情報{% endblock %}
+{% block content %}
+<h1>店舗情報</h1>
+<form method="post" class="card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  {% for key, label, default in fields %}
+  <label>{{ label }}
+    {% if key == 'service_note' %}
+    <textarea name="{{ key }}" rows="3">{{ values.get(key, default) }}</textarea>
+    {% else %}
+    <input name="{{ key }}" value="{{ values.get(key, default) }}">
+    {% endif %}
+  </label>
+  {% endfor %}
+  <button class="btn">保存する</button>
+</form>
+{% endblock %}

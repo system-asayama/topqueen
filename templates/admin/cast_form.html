@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+{% block title %}キャスト編集{% endblock %}
+{% block content %}
+<h1>{{ 'キャストを編集' if item.id else 'キャストを追加' }}</h1>
+<form method="post" enctype="multipart/form-data" class="card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="photo-field">
+    <div class="thumb lg">{% if item.image_id %}<img src="{{ url_for('media', image_id=item.image_id) }}" alt="">{% else %}<span>写真なし</span>{% endif %}</div>
+    <div>
+      <label>写真（JPEG / PNG / WebP、縦長がおすすめ）<input type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif"></label>
+      {% if item.image_id %}<label class="check"><input type="checkbox" name="remove_image" value="1"> 写真を削除する</label>{% endif %}
+    </div>
+  </div>
+  <label>名前 *<input name="name" value="{{ item.name or '' }}" required></label>
+  <div class="row">
+    <label>年齢<input type="number" name="age" min="18" max="99" value="{{ item.age or '' }}"></label>
+    <label>出身<input name="origin" value="{{ item.origin or '' }}" placeholder="Manila"></label>
+    <label>並び順<input type="number" name="sort_order" value="{{ item.sort_order or 0 }}"></label>
+  </div>
+  <label>コメント<textarea name="comment" rows="3">{{ item.comment or '' }}</textarea></label>
+  <label class="check"><input type="checkbox" name="is_new" value="1" {{ 'checked' if item.is_new }}> NEW マークを付ける</label>
+  <label class="check"><input type="checkbox" name="visible" value="1" {{ 'checked' if item.visible }}> サイトに表示する</label>
+  <div class="btns"><button class="btn">保存する</button><a class="btn ghost" href="{{ url_for('admin.casts') }}">戻る</a></div>
+</form>
+{% endblock %}

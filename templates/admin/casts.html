@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% block title %}キャスト{% endblock %}
+{% block content %}
+<div class="head-row"><h1>キャスト</h1><a class="btn" href="{{ url_for('admin.cast_edit') }}">＋ 新しく追加</a></div>
+<p class="hint">並び順の数字が小さい順にサイトに表示されます。</p>
+<div class="cast-list">
+  {% for c in items %}
+  <div class="cast-item {{ 'hidden' if not c.visible }}">
+    <div class="thumb">{% if c.image_id %}<img src="{{ url_for('media', image_id=c.image_id) }}" alt="">{% else %}<span>{{ c.name[0] }}</span>{% endif %}</div>
+    <div class="info">
+      <b>{{ c.name }}</b> {% if c.is_new %}<em class="tag pink">NEW</em>{% endif %}{% if not c.visible %}<em class="tag">非表示</em>{% endif %}
+      <small>{{ c.age or '-' }}歳 ／ {{ c.origin or '-' }} ／ 並び順 {{ c.sort_order }}</small>
+    </div>
+    <div class="actions">
+      <a class="btn sm" href="{{ url_for('admin.cast_edit', cast_id=c.id) }}">編集</a>
+      <form method="post" action="{{ url_for('admin.cast_delete', cast_id=c.id) }}" onsubmit="return confirm('{{ c.name }} を削除しますか？')">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn sm danger">削除</button>
+      </form>
+    </div>
+  </div>
+  {% else %}<p>キャストが登録されていません。</p>{% endfor %}
+</div>
+{% endblock %}

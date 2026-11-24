@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<h1>ダッシュボード</h1>
+<p class="hint">ようこそ、{{ g.admin.username }} さん。編集した内容はすぐにサイトに反映されます。</p>
+<div class="tiles">
+  <a class="tile" href="{{ url_for('admin.shop') }}"><b>店舗情報</b><span>住所・電話・営業時間・SNS</span></a>
+  <a class="tile" href="{{ url_for('admin.prices') }}"><b>料金</b><span>{{ price_count }} 項目</span></a>
+  <a class="tile" href="{{ url_for('admin.casts') }}"><b>キャスト</b><span>{{ cast_visible }} 人表示中 ／ 全 {{ cast_count }} 人</span></a>
+  <a class="tile" href="{{ url_for('admin.events') }}"><b>イベント</b><span>{{ event_count }} 件</span></a>
+</div>
+{% endblock %}
