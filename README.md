@@ -1,2 +1,3 @@
 # topqueen
-トップクイーン
+
+Docker Compose (Flask + PostgreSQL)
