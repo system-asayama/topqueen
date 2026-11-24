@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ shop.name }}｜{{ shop.genre }} {{ shop.kana }}</title>
+  <meta name="description" content="{{ shop.genre }}「{{ shop.name }}」公式サイト。明るく可愛いフィリピーナが笑顔でお迎えします。料金システム・キャスト・アクセス・求人情報。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="header" id="top">
+  <a href="#top" class="logo">
+    <span class="logo-crown" aria-hidden="true">♛</span>
+    <span class="logo-text">TOP QUEEN</span>
+  </a>
+  <button class="nav-toggle" aria-label="メニュー" aria-expanded="false"><span></span><span></span><span></span></button>
+  <nav class="nav">
+    <a href="#concept">CONCEPT</a>
+    <a href="#system">SYSTEM</a>
+    <a href="#cast">CAST</a>
+    <a href="#event">EVENT</a>
+    <a href="#access">ACCESS</a>
+    <a href="#recruit">RECRUIT</a>
+    <a href="tel:{{ shop.tel_link }}" class="nav-tel">☎ {{ shop.tel }}</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true">
+    <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
+    <span class="spark s4"></span><span class="spark s5"></span><span class="spark s6"></span>
+  </div>
+  <div class="hero-inner">
+    <p class="hero-sub">PHILIPPINE PUB</p>
+    <div class="hero-crown" aria-hidden="true">♛</div>
+    <h1 class="hero-title">TOP QUEEN</h1>
+    <p class="hero-kana">{{ shop.genre }} ｜ {{ shop.kana }}</p>
+    <p class="hero-copy">笑顔と情熱の南国パラダイス。<br>今夜の主役は、あなたです。</p>
+    <div class="hero-info">
+      <span>OPEN {{ shop.hours }}</span><span>{{ shop.holiday }}</span>
+    </div>
+    <div class="hero-btns">
+      <a href="tel:{{ shop.tel_link }}" class="btn btn-gold">電話で問い合わせ</a>
+      <a href="#system" class="btn btn-outline">料金システム</a>
+    </div>
+  </div>
+  <a href="#concept" class="scroll-down" aria-label="下へスクロール">SCROLL</a>
+</section>
+
+<!-- CONCEPT -->
+<section class="section concept" id="concept">
+  <div class="container">
+    <h2 class="sec-title"><span>CONCEPT</span>お店について</h2>
+    <div class="concept-grid">
+      <div class="concept-text">
+        <p class="lead">陽気で明るいフィリピーナが<br>心を込めておもてなし。</p>
+        <p>{{ shop.name }}は、本場フィリピン出身の明るく可愛いキャストが在籍するフィリピンパブです。
+          カラオケ・ダンスショー・季節のイベントなど、日常を忘れて楽しめる時間をご用意しています。
+          初めての方、お一人様、会社帰りのグループ様も大歓迎。安心の明朗会計でお待ちしております。</p>
+      </div>
+      <ul class="feature-list">
+        <li><b>01</b><h3>明朗会計</h3><p>セット料金で飲み放題。追加料金も事前にご案内します。</p></li>
+        <li><b>02</b><h3>カラオケ無料</h3><p>最新機種完備。キャストとデュエットも！</p></li>
+        <li><b>03</b><h3>ショータイム</h3><p>週末はキャストによるダンスショーを開催。</p></li>
+        <li><b>04</b><h3>VIPルーム</h3><p>接待や記念日にも使える特別なお席をご用意。</p></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SYSTEM -->
+<section class="section system" id="system">
+  <div class="container">
+    <h2 class="sec-title"><span>SYSTEM</span>料金システム</h2>
+    <div class="price-grid">
+      {% for s in system %}
+      <div class="price-card">
+        <h3>{{ s.title }}</h3>
+        <p class="price">{{ s.price }}</p>
+        {% if s.note %}<p class="price-note">{{ s.note }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <table class="option-table">
+      <caption>OPTION</caption>
+      {% for name, price in options %}
+      <tr><th>{{ name }}</th><td>{{ price }}</td></tr>
+      {% endfor %}
+    </table>
+    <p class="small">※ 表示価格は税込です。別途サービス料 20% を頂戴いたします。<br>※ 各種クレジットカードご利用いただけます。</p>
+  </div>
+</section>
+
+<!-- CAST -->
+<section class="section cast" id="cast">
+  <div class="container">
+    <h2 class="sec-title"><span>CAST</span>キャスト紹介</h2>
+    <div class="cast-grid">
+      {% for c in cast %}
+      <article class="cast-card">
+        <div class="cast-photo">
+          {% if c.image %}
+          <img src="{{ url_for('static', filename='img/cast/' ~ c.image) }}" alt="{{ c.name }}" loading="lazy">
+          {% else %}
+          <div class="cast-placeholder"><span>{{ c.name[0] }}</span></div>
+          {% endif %}
+          {% if c.new %}<span class="badge-new">NEW</span>{% endif %}
+        </div>
+        <div class="cast-body">
+          <h3>{{ c.name }}</h3>
+          <p class="cast-meta">{{ c.age }}歳 ／ from {{ c.from_ }}</p>
+          <p class="cast-comment">{{ c.comment }}</p>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    <p class="center small">出勤情報は公式LINE・Instagramで毎日更新中！</p>
+  </div>
+</section>
+
+<!-- EVENT -->
+<section class="section event" id="event">
+  <div class="container">
+    <h2 class="sec-title"><span>EVENT</span>イベント・お知らせ</h2>
+    <ul class="event-list">
+      {% for e in events %}
+      <li>
+        <time>{{ e.date }}</time>
+        <div><h3>{{ e.title }}</h3><p>{{ e.body }}</p></div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+<!-- ACCESS -->
+<section class="section access" id="access">
+  <div class="container">
+    <h2 class="sec-title"><span>ACCESS</span>店舗情報</h2>
+    <div class="access-grid">
+      <table class="info-table">
+        <tr><th>店名</th><td>{{ shop.genre }} {{ shop.name }}（{{ shop.kana }}）</td></tr>
+        <tr><th>住所</th><td>{{ shop.address }}</td></tr>
+        <tr><th>最寄駅</th><td>{{ shop.station }}</td></tr>
+        <tr><th>営業時間</th><td>{{ shop.hours }}</td></tr>
+        <tr><th>定休日</th><td>{{ shop.holiday }}</td></tr>
+        <tr><th>TEL</th><td><a href="tel:{{ shop.tel_link }}">{{ shop.tel }}</a></td></tr>
+      </table>
+      <div class="map">
+        <iframe src="https://www.google.com/maps?q={{ shop.map_query | urlencode }}&output=embed" loading="lazy" title="地図" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RECRUIT -->
+<section class="section recruit" id="recruit">
+  <div class="container">
+    <h2 class="sec-title"><span>RECRUIT</span>求人情報</h2>
+    <div class="recruit-grid">
+      <div class="recruit-card">
+        <h3>ホールスタッフ・ボーイ</h3>
+        <dl>
+          <dt>給与</dt><dd>時給 1,300円〜（経験・能力により優遇）</dd>
+          <dt>時間</dt><dd>19:30〜LAST（週2日〜OK）</dd>
+          <dt>待遇</dt><dd>交通費支給・まかない有・昇給随時</dd>
+        </dl>
+      </div>
+      <div class="recruit-card">
+        <h3>フロア・キャスト</h3>
+        <dl>
+          <dt>給与</dt><dd>時給 2,500円〜 ＋ 各種バック</dd>
+          <dt>時間</dt><dd>20:00〜LAST（シフト自由）</dd>
+          <dt>待遇</dt><dd>日払いOK・送り有・寮完備（要相談）</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="center small">※ 就労可能な在留資格をお持ちの方に限ります。お気軽にお電話・LINEでお問い合わせください。</p>
+  </div>
+</section>
+
+<!-- CONTACT CTA -->
+<section class="cta">
+  <p>ご予約・お問い合わせはお気軽に</p>
+  <a href="tel:{{ shop.tel_link }}" class="cta-tel">☎ {{ shop.tel }}</a>
+  <div class="sns">
+    <a href="{{ shop.line_url }}" class="sns-line">LINE</a>
+    <a href="{{ shop.instagram_url }}" class="sns-insta">Instagram</a>
+    <a href="{{ shop.x_url }}" class="sns-x">X</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="logo"><span class="logo-crown">♛</span><span class="logo-text">TOP QUEEN</span></div>
+  <p class="small">※ 20歳未満の方のご入店・飲酒は固くお断りいたします。</p>
+  <p class="copy">&copy; {{ shop.name }} All Rights Reserved.</p>
+</footer>
+
+<a href="tel:{{ shop.tel_link }}" class="fixed-tel">☎ 電話する</a>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
