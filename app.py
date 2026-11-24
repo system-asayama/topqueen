@@ -12,8 +12,11 @@ from models import Cast, Event, Image, PriceItem, Recruit, Setting, db, get_shop
 app = Flask(__name__)
 
 database_url = os.environ.get("DATABASE_URL", "sqlite:///topqueen.db")
-if database_url.startswith("postgres://"):
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
+# ドライバを psycopg2 に固定（SQLAlchemy 2.1 以降は postgresql:// の既定が psycopg3 になるため）
+for prefix in ("postgres://", "postgresql://"):
+    if database_url.startswith(prefix):
+        database_url = "postgresql+psycopg2://" + database_url[len(prefix):]
+        break
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 画像アップロード上限 10MB
